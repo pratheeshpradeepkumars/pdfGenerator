@@ -3,6 +3,18 @@ const bodyParser = require('body-parser');
 const pdf = require('html-pdf');
 const cors = require('cors');
 const pdfTemplate = require('./documents/index.js');
+const puppeteer = require('puppeteer')
+ 
+async function printPDF() {
+    const browser = await puppeteer.launch({ headless: true });
+    const page = await browser.newPage();
+    await page.goto('http://localhost:3000', {waitUntil: 'networkidle0'});
+    const pdf = await page.pdf({ format: 'A4' });
+
+    await browser.close();
+    return pdf;
+}
+
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -26,3 +38,14 @@ app.post('/create-pdf', (req, res) => {
 app.get('/fetch-pdf', (req, res) => { 
     res.sendFile(`${__dirname}/rezultati.pdf`);
 });
+
+app.get('/print-pdf', async (req, res) => { 
+    console.log('Please wait printing pdf is in progress');
+    let pdf = await printPDF();
+    console.log(pdf);
+    res.set({ 'Content-Type': 'application/pdf', 'Content-Length': pdf.length })
+    res.send(pdf);
+   
+});
+
+

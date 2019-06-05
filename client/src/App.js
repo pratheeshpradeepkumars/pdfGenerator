@@ -21,9 +21,28 @@ class App extends React.Component  {
             saveAs(pdfBlob, 'generatedDocument.pdf')
         });
     };
+    getPDF =() => {
+        return axios.get('/print-pdf', {
+            responseType: 'arraybuffer',
+            headers: {
+                'Accept': 'application/pdf'
+            }
+        });
+    }
+    savePDF = () => {
+        return this.getPDF() // API call
+        .then((response) => {
+            const blob = new Blob([response.data], {type: 'application/pdf'})
+            const link = document.createElement('a')
+            link.href = window.URL.createObjectURL(blob)
+            link.download = `your-file-name.pdf`
+            link.click()
+        }).catch(err => {console.log(err);});
+    }
     render() {
         return (
             <div className="App">
+                <button onClick={this.savePDF}>Save as PDF</button>
                 <input type="text" 
                     placeholder="Name" 
                     name="name" 
